@@ -93,6 +93,21 @@
       gap: 0.75rem;
       align-items: start;
     }
+    #common-lunch-dinner .video-thumb-grid {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.75rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.15rem 0.15rem 0.65rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    #common-lunch-dinner .video-thumb-grid > li {
+      flex: 0 0 9.5rem;
+      width: 9.5rem;
+      scroll-snap-align: start;
+    }
     .video-thumb {
       position: relative;
       display: block;
@@ -403,6 +418,13 @@
               <span class="video-thumb-play" aria-hidden="true">▶</span>
             </button>
           </li>
+          <li>
+            <button type="button" class="video-thumb" data-target="high-protein-pasta-video" aria-label="High Protein Pasta">
+              <span class="video-thumb-label">High Protein Pasta</span>
+              <img id="highProteinPastaYoutubeThumb" src="" alt="">
+              <span class="video-thumb-play" aria-hidden="true">▶</span>
+            </button>
+          </li>
         </ul>
         <div class="video-category-players">
           <div class="video-player-panel" id="subway-video" data-play-key="subway" hidden>
@@ -503,6 +525,31 @@
             </p>
             <p>
               <a class="video-file-link" href="https://youtube.com/shorts/W9ARIIeNzS4" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+            </p>
+          </div>
+          <div class="video-player-panel" id="high-protein-pasta-video" data-play-key="high-protein-pasta" hidden>
+            <div class="youtube-facade-wrap">
+              <div id="highProteinPastaYoutubeFacade" class="youtube-facade youtube-frame youtube-frame--landscape">
+                <button type="button" class="youtube-facade-btn" id="highProteinPastaYoutubePlayBtn" aria-label="Play High Protein Pasta video">
+                  <img id="highProteinPastaYoutubePoster" src="" alt="High Protein Pasta — first frame preview">
+                  <span class="youtube-play-label">▶ Play video</span>
+                </button>
+              </div>
+              <div id="highProteinPastaYoutubeEmbed" class="youtube-embed-wrap youtube-frame youtube-frame--landscape" hidden>
+                <iframe
+                  id="highProteinPastaYoutubePlayer"
+                  title="High Protein Pasta on YouTube"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            </div>
+            <p id="highProteinPastaYoutubeLocalNote" class="youtube-facade-note" hidden>
+              For the embedded player, open this site with Live Server or GitHub Pages. You can still play via the button (opens YouTube).
+            </p>
+            <p>
+              <a class="video-file-link" href="https://youtu.be/TZQ7wOmZA-8" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
             </p>
           </div>
         </div>
@@ -761,6 +808,24 @@
           localNoteId: "quesadillaYoutubeLocalNote",
           sectionId: "quesadilla-video",
           playKey: "quesadilla",
+        }),
+        setupYoutubeSection({
+          videoId: "TZQ7wOmZA-8",
+          watchUrl: "https://youtu.be/TZQ7wOmZA-8",
+          posterId: "highProteinPastaYoutubePoster",
+          thumbId: "highProteinPastaYoutubeThumb",
+          posterUrls: [
+            "https://i.ytimg.com/vi/TZQ7wOmZA-8/maxresdefault.jpg",
+            "https://i.ytimg.com/vi/TZQ7wOmZA-8/sddefault.jpg",
+            "https://i.ytimg.com/vi/TZQ7wOmZA-8/hqdefault.jpg",
+          ],
+          facadeId: "highProteinPastaYoutubeFacade",
+          playBtnId: "highProteinPastaYoutubePlayBtn",
+          embedWrapId: "highProteinPastaYoutubeEmbed",
+          iframeId: "highProteinPastaYoutubePlayer",
+          localNoteId: "highProteinPastaYoutubeLocalNote",
+          sectionId: "high-protein-pasta-video",
+          playKey: "high-protein-pasta",
         }),
         setupYoutubeSection({
           videoId: "_jnvkHxHmvQ",
