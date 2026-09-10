@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Understanding Blood Sugar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --brand-primary: #f97316;
+      --brand-primary-dark: #ea580c;
+      --brand-text: #1f2937;
+      --brand-muted: #6b7280;
+      --brand-bg: #f3f4f6;
+      --brand-white: #ffffff;
+      --brand-border: #fed7aa;
+      --band-blue: #1d4ed8;
+      --band-green: #16a34a;
+      --sticky-header-estimate: 260px;
+    }
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: var(--sticky-header-estimate);
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--brand-bg);
+      color: var(--brand-text);
+    }
+    header {
+      background: var(--brand-white);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      overflow: visible;
+    }
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 32px 8px;
+      background: var(--brand-white);
+      position: relative;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+    .logo-img {
+      width: 569px;
+      height: 190px;
+      object-fit: contain;
+      object-position: left center;
+      border-radius: 8px;
+      display: block;
+    }
+    .voice-tool-wrap {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-46%, -50%) scale(0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      justify-content: center;
+      z-index: 2;
+      pointer-events: auto;
+    }
+    a.voice-tool,
+    button.voice-tool {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 18px;
+      border: 3px solid var(--brand-primary);
+      border-radius: 999px;
+      background: var(--brand-white);
+      color: #000;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 0.94rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.18);
+      white-space: nowrap;
+      cursor: pointer;
+      box-sizing: border-box;
+      margin: 0;
+    }
+    button.voice-tool {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .sr-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 100;
+    }
+    .sr-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 101;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .sr-modal[hidden],
+    .sr-backdrop[hidden] {
+      display: none !important;
+    }
+    .sr-modal-card {
+      width: min(100%, 28rem);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--brand-white);
+      border: 1px solid var(--brand-border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem 1.25rem;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+    }
+    .sr-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .sr-modal-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--band-blue);
+    }
+    .sr-close {
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+      color: var(--brand-muted);
+    }
+    .sr-status {
+      font-size: 0.9rem;
+      color: var(--brand-muted);
+      margin: 0 0 0.5rem;
+    }
+    .sr-greeting {
+      font-weight: 600;
+      margin: 0 0 0.75rem;
+      color: var(--brand-text);
+    }
+    .sr-label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+    }
+    .sr-text-input {
+      width: 100%;
+      border: 1px solid var(--brand-border);
+      border-radius: 8px;
+      padding: 0.5rem;
+      font: inherit;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    .sr-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0.75rem 0;
+    }
+    .sr-btn {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 2px solid var(--brand-primary);
+      background: var(--brand-white);
+      color: var(--brand-text);
+      font-weight: 600;
+      cursor: pointer;
+      font: inherit;
+      transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    }
+    .sr-btn:active {
+      background: #9ca3af;
+      border-color: #9ca3af;
+      color: #fff;
+    }
+    .sr-transcript,
+    .sr-response {
+      font-size: 0.95rem;
+      margin: 0.5rem 0;
+      white-space: pre-wrap;
+      line-height: 1.55;
+    }
+    .sr-response {
+      background: #fff7ed;
+      border-radius: 8px;
+      padding: 0.75rem;
+      border: 1px solid var(--brand-border);
+    }
+    .sr-disclaimer {
+      font-size: 0.8rem;
+      color: var(--brand-muted);
+      margin: 1rem 0 0;
+    }
+    .mic-icon {
+      flex: 0 0 28px;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      min-height: 28px;
+      border-radius: 999px;
+      border: 2px solid var(--brand-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .top-right-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .language-select {
+      font-size: 0.94rem;
+      padding: 9px 15px;
+      border: 3px solid var(--brand-primary);
+      border-radius: 2px;
+      background: transparent;
+      color: #000;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .menu-bar {
+      border-top: 1px solid var(--brand-border);
+      border-bottom: 1px solid var(--brand-border);
+      background: var(--brand-white);
+      padding: 6px 12px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: stretch;
+      gap: 2px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .menu-bar .nav-slot {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      position: relative;
+      z-index: 1;
+    }
+    .menu-bar .nav-slot:hover {
+      z-index: 40;
+    }
+    .nav-dropdown {
+      position: relative;
+      width: 100%;
+      text-align: center;
+    }
+    .nav-dropdown-trigger {
+      appearance: none;
+      margin: 0;
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      padding: 8px 6px;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--brand-text);
+      background: transparent;
+      border: none;
+      user-select: none;
+      text-align: center;
+    }
+    .nav-dropdown-trigger::after {
+      content: " ▾";
+      font-size: 0.65em;
+      opacity: 0.75;
+    }
+    .nav-dropdown:hover > .nav-dropdown-trigger,
+    .nav-dropdown:focus-within > .nav-dropdown-trigger {
+      color: var(--brand-primary);
+    }
+    .nav-dropdown-menu {
+      display: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 6px 0;
+      list-style: none;
+      background: var(--brand-white);
+      border: 1px solid var(--brand-border);
+      border-radius: 6px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+      z-index: 25;
+      text-align: left;
+    }
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown:focus-within .nav-dropdown-menu {
+      display: block;
+    }
+    .nav-dropdown-menu a {
+      display: block;
+      padding: 8px 14px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--brand-text);
+      text-decoration: none;
+    }
+    .nav-dropdown-menu a:hover {
+      background: var(--brand-bg);
+      color: var(--brand-primary);
+    }
+    .nav-link-single {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--brand-text);
+      text-decoration: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .nav-link-single:hover {
+      color: var(--brand-primary);
+    }
+    .page-content {
+      width: 100%;
+      overflow-x: hidden;
+    }
+    .tri-columns {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 0;
+      padding: 0;
+      align-items: stretch;
+      box-sizing: border-box;
+      scroll-margin-top: var(--sticky-header-estimate);
+      background: transparent;
+      width: 100%;
+    }
+    .tri-columns .content-band {
+      min-height: max(300px, calc(38svh - var(--sticky-header-estimate) / 2));
+    }
+    .content-band {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      padding: clamp(14px, 2.5vw, 22px);
+      box-sizing: border-box;
+      min-height: 0;
+    }
+    .content-band.band-blue {
+      background: var(--band-blue);
+      color: #fff;
+    }
+    .content-band.band-green {
+      background: var(--band-green);
+      color: #fff;
+    }
+    .tri-columns > .content-band {
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .tri-columns > .content-band:nth-child(1) {
+      border-top-left-radius: 8px;
+    }
+    .tri-columns > .content-band:nth-child(2) {
+      border-top-right-radius: 8px;
+    }
+    .tri-columns > .content-band:nth-child(3) {
+      border-bottom-left-radius: 8px;
+    }
+    .tri-columns > .content-band:nth-child(4) {
+      border-bottom-right-radius: 8px;
+    }
+    .band-inner {
+      width: 100%;
+      max-width: 100%;
+      text-align: center;
+    }
+    .tri-columns .band-inner > h2 {
+      margin: 0 0 0.25rem;
+      font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+      font-weight: 700;
+      line-height: 1.15;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+    .content-band .band-lead {
+      margin: 0 auto 0.5rem;
+      max-width: 100%;
+      font-size: clamp(0.9rem, 1.75vw, 1rem);
+      line-height: 1.65;
+      color: rgba(255,255,255,0.88);
+    }
+    .content-band.band-clickable .band-inner {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      min-height: 100%;
+      flex: 1 1 auto;
+    }
+    .band-copy-above-images {
+      flex: 0 0 auto;
+      min-height: clamp(5rem, 10vw, 6.5rem);
+    }
+    .band-visual-area {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      width: 100%;
+      min-height: 0;
+    }
+    .content-band .band-video-link {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      font-weight: 700;
+      color: #fff;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .content-band .band-video-link:hover {
+      color: rgba(255, 255, 255, 0.92);
+    }
+    .content-band .band-detail {
+      margin: 0 auto 1rem;
+      max-width: 100%;
+      font-size: clamp(0.8rem, 1.5vw, 0.92rem);
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .content-band.band-clickable {
+      padding: clamp(14px, 2.5vw, 22px);
+    }
+    .band-pane-link {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      width: 100%;
+      flex: 1 1 auto;
+      box-sizing: border-box;
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+    .band-pane-link--visual {
+      min-height: 0;
+      padding: 0;
+      margin-top: 0.5rem;
+    }
+    .band-pane-link:hover {
+      filter: brightness(1.06);
+    }
+    .band-pane-link:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: -4px;
+    }
+    .content-band .band-detail {
+      margin-bottom: 0.35rem;
+    }
+    .content-band .band-click-hint {
+      margin: 0;
+      font-size: clamp(0.78rem, 1.4vw, 0.88rem);
+      line-height: 1.4;
+      color: rgba(255, 255, 255, 0.9);
+      font-style: italic;
+    }
+    #current-analysis .band-video-link {
+      font-style: normal;
+      color: #fff;
+    }
+    .pbj-images-wrap {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      margin: 0;
+    }
+    .pbj-img-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1 1 0;
+      min-width: 0;
+      background: none;
+      border: none;
+      border-radius: 0;
+      overflow: visible;
+      box-shadow: none;
+      padding: 0;
+    }
+    .pbj-img-cell img {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: min(36vh, 280px);
+    }
+    #current-analysis .band-pane-link--visual {
+      margin-top: 0.85rem;
+    }
+    #current-analysis .pbj-images-wrap {
+      margin-top: 0.25rem;
+    }
+    #current-analysis .pbj-img-cell--curve img {
+      transform: translateY(10px) scaleY(0.9);
+      transform-origin: center center;
+    }
+    #current-analysis .pbj-img-cell--curve {
+      align-self: center;
+    }
+    #current-analysis .pbj-img-cell--cover {
+      align-self: center;
+    }
+    #current-analysis .pbj-img-cell--cover img {
+      transform: translateY(10px);
+    }
+    #smoothies-protein-bowls .pbj-images-wrap {
+      align-items: center;
+      gap: 14px;
+    }
+    #smoothies-protein-bowls .pbj-img-cell {
+      align-items: center;
+      align-self: stretch;
+      min-height: min(34vh, 270px);
+    }
+    #smoothies-protein-bowls .pbj-img-cell img {
+      transform: none;
+      object-fit: contain;
+    }
+    #smoothies-protein-bowls .pbj-img-cell--cover img {
+      max-height: min(38vh, 300px);
+    }
+    #smoothies-protein-bowls .pbj-img-cell--curve img {
+      max-height: min(34vh, 250px);
+      transform: translateY(14px);
+    }
+    #pizza-vs-salad .band-visual-area {
+      align-items: center;
+      justify-content: center;
+    }
+    #pizza-vs-salad .band-pane-link--visual {
+      margin-top: 1rem;
+    }
+    #pizza-vs-salad .pbj-images-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+    #pizza-vs-salad .pbj-img-cell {
+      flex: 1 1 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      height: min(34vh, 255px);
+      min-height: min(34vh, 255px);
+      max-height: min(34vh, 255px);
+    }
+    #pizza-vs-salad .pbj-img-cell img {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      transform: none;
+      margin: 0 auto;
+    }
+    @media (max-width: 520px) {
+      .pbj-images-wrap {
+        flex-direction: column;
+        min-height: auto;
+      }
+      .pbj-img-cell img {
+        max-height: 220px;
+      }
+      #smoothies-protein-bowls .pbj-img-cell {
+        min-height: auto;
+      }
+      #smoothies-protein-bowls .pbj-img-cell--cover img {
+        max-height: 220px;
+      }
+      #smoothies-protein-bowls .pbj-img-cell--curve img {
+        max-height: 200px;
+        transform: translateY(8px);
+      }
+      #pizza-vs-salad .pbj-img-cell {
+        height: 210px;
+        min-height: 210px;
+        max-height: 210px;
+      }
+    }
+    .pattern-img {
+      display: block;
+      width: auto;
+      max-width: 92%;
+      height: auto;
+      max-height: min(36vh, 280px);
+      margin: 0 auto;
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      vertical-align: top;
+    }
+    #blood-sugar-patterns .pattern-img {
+      position: static;
+      left: auto;
+      transform: none;
+    }
+    #blood-sugar-patterns.content-band {
+      overflow-x: visible;
+    }
+    .tri-windows {
+      min-height: min(70vh, 640px);
+    }
+    .tri-window {
+      background: var(--brand-white);
+      border: 3px solid var(--brand-primary);
+      border-radius: 0;
+      border-left-width: 0;
+      padding: clamp(18px, 3vw, 26px);
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+    }
+    .tri-columns .tri-window:first-child {
+      border-left-width: 3px;
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+    }
+    .tri-columns .tri-window:last-child {
+      border-color: var(--band-green);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    .tri-window h3 {
+      margin: 0 0 12px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--brand-text);
+    }
+    .tri-window p {
+      margin: 0;
+      flex: 1;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--brand-muted);
+    }
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.85rem;
+      color: var(--brand-muted);
+    }
+    @media (max-width: 768px) {
+      .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 10px 16px 6px;
+      }
+      .logo-img {
+        width: 345px;
+        height: 130px;
+      }
+      .voice-tool-wrap {
+        position: static;
+        transform: scale(0.95);
+        transform-origin: top center;
+        order: 2;
+        width: 100%;
+        margin: 4px auto;
+      }
+      .logo {
+        order: 1;
+      }
+      .top-right-controls {
+        order: 3;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+      a.voice-tool,
+      button.voice-tool {
+        font-size: 0.85rem;
+        min-height: 44px;
+        padding: 8px 14px;
+      }
+      .mic-icon {
+        flex: 0 0 26px;
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
+        min-height: 26px;
+        font-size: 14px;
+      }
+      .language-select {
+        font-size: 0.8rem;
+        padding: 5px 8px;
+      }
+      .menu-bar {
+        padding: 8px 10px;
+        gap: 4px 0;
+      }
+      .menu-bar .nav-slot {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 140px;
+      }
+      :root {
+        --sticky-header-estimate: 340px;
+      }
+    }
+    @media (max-width: 520px) {
+      .menu-bar .nav-slot {
+        flex: 1 1 100%;
+      }
+    }
+    @media (max-width: 900px) {
+      .tri-columns {
+        grid-template-columns: 1fr;
+        min-height: 0;
+        gap: clamp(14px, 3vw, 20px);
+        padding: clamp(16px, 4vw, 24px);
+        background: var(--brand-bg);
+      }
+      .tri-windows {
+        min-height: 0;
+      }
+      .tri-columns > .content-band {
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+      }
+      .tri-columns > .tri-window {
+        border-left-width: 3px;
+        border-radius: 8px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top-bar">
+      <div class="logo">
+        <img class="logo-img" src="images/logo.png" alt="Understanding Blood Sugar">
+      </div>
+      <div class="voice-tool-wrap">
+        <button type="button" class="voice-tool" id="spikeReducerOpenBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="spikeReducerModal">
+          <span class="mic-icon" aria-hidden="true">🎤</span>
+          <span>Talk To Spike Reducer</span>
+        </button>
+      </div>
+      <div class="top-right-controls">
+        <select class="language-select" aria-label="Select language">
+          <option value="en-us">US English</option>
+          <option value="es-us">US Spanish</option>
+        </select>
+      </div>
+    </div>
+    <nav class="menu-bar" aria-label="Main navigation">
+      <div class="nav-slot">
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">About</button>
+          <ul class="nav-dropdown-menu" role="menu">
+            <li role="none"><a href="about.html" role="menuitem">Motivation</a></li>
+            <li role="none"><a href="about_me.html" role="menuitem">About me</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-slot">
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">Tools</button>
+          <ul class="nav-dropdown-menu" role="menu">
+            <li role="none"><a href="tools-apps.html" role="menuitem">Apps</a></li>
+            <li role="none"><a href="tools-cgms.html" role="menuitem">CGMs</a></li>
+            <li role="none"><a href="tools-glucometers.html" role="menuitem">Glucometers</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-slot">
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">Tested Spikes</button>
+          <ul class="nav-dropdown-menu" role="menu">
+            <li role="none"><a href="tested-my-videos.html" role="menuitem">My Videos</a></li>
+            <li role="none"><a href="tested-plot-your-spikes.html" role="menuitem">Plot Your Spikes</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-slot">
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">Fuel &amp; Move</button>
+          <ul class="nav-dropdown-menu" role="menu">
+            <li role="none"><a href="fuel-recipes.html" role="menuitem">Recipes</a></li>
+            <li role="none"><a href="fuel-daily-exercises.html" role="menuitem">Daily exercises</a></li>
+            <li role="none"><a href="fuel-food-dos-donts.html" role="menuitem">Food — Dos &amp; Don&apos;ts</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-slot">
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">Community Outreach</button>
+          <ul class="nav-dropdown-menu" role="menu">
+            <li role="none"><a href="outreach-ymca.html" role="menuitem">YMCA</a></li>
+            <li role="none"><a href="outreach-schools.html" role="menuitem">Schools</a></li>
+            <li role="none"><a href="outreach-health-fairs.html" role="menuitem">Health Fairs</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-slot">
+        <a class="nav-link-single" href="contact.html">Contact Me</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <section class="tri-columns" aria-label="Blood sugar overview">
+      <section id="blood-sugar-patterns" class="content-band band-blue band-clickable" aria-labelledby="heading-patterns">
+        <div class="band-inner">
+          <div class="band-copy-above-images">
+            <h2 id="heading-patterns">Blood Sugar Patterns</h2>
+            <p class="band-lead">
+              Patterns in how glucose rises and falls after meals can reveal how your body responds to food and habits.
+              Use this chart as a reference as you explore your own rhythms.
+            </p>
+            <p class="band-click-hint">Click the picture below to watch the video</p>
+          </div>
+          <a class="band-pane-link band-pane-link--visual" href="tested-my-videos.html#good-vs-bad-spike-video" aria-label="Watch What is a Good vs. Bad Blood Glucose Spike video on My Videos">
+            <div class="band-visual-area">
+              <img class="pattern-img" src="images/SugarSpikes00.png" alt="Good vs. bad blood glucose spike comparison — click to watch video">
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section id="current-analysis" class="content-band band-green band-clickable" aria-labelledby="heading-current">
+        <div class="band-inner">
+          <div class="band-copy-above-images">
+            <h2 id="heading-current">PBJ Vs PB&amp;Fruit</h2>
+            <p class="band-detail">Using commonly available Peanut Butter, Jelly and bread brands</p>
+            <p class="band-click-hint">Click the picture below to watch the video</p>
+          </div>
+          <a class="band-pane-link band-pane-link--visual" href="tested-my-videos.html#pbj-video" aria-label="Watch PBJ vs PB and Fruit video on My Videos">
+            <div class="band-visual-area">
+              <div class="pbj-images-wrap">
+                <div class="pbj-img-cell pbj-img-cell--cover">
+                  <img class="pbj-img-cover" src="images/PBJ_Cover.jpg" alt="PBJ meal comparison cover — click to watch video">
+                </div>
+                <div class="pbj-img-cell pbj-img-cell--curve">
+                  <img class="pbj-img-curve" src="images/PBJ_Curve.jpg" alt="Blood sugar curve comparison — click to watch video">
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section id="smoothies-protein-bowls" class="content-band band-green band-clickable" aria-labelledby="heading-smoothies">
+        <div class="band-inner">
+          <div class="band-copy-above-images">
+            <h2 id="heading-smoothies">Smoothies/Protein Bowls</h2>
+            <p class="band-detail">Comparing smoothie and protein bowl options for steadier glucose</p>
+            <p class="band-click-hint">Click the picture below to watch the video</p>
+          </div>
+          <a class="band-pane-link band-pane-link--visual" href="tested-my-videos.html#smoothies-protein-bowls-video" aria-label="Watch Smoothies/Protein Bowls video on My Videos">
+            <div class="band-visual-area">
+              <div class="pbj-images-wrap">
+                <div class="pbj-img-cell pbj-img-cell--cover">
+                  <img class="pbj-img-cover" src="images/MangoProteinSmoothieBowl.png" alt="Mango protein smoothie bowl — click to watch video">
+                </div>
+                <div class="pbj-img-cell pbj-img-cell--curve">
+                  <img class="pbj-img-curve" src="images/SmoothieBowl_Curve.png" alt="Mango smoothie bowl blood sugar spike — click to watch video">
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section id="pizza-vs-salad" class="content-band band-blue band-clickable" aria-labelledby="heading-pizza">
+        <div class="band-inner">
+          <div class="band-copy-above-images">
+            <h2 id="heading-pizza">Pizza vs Salad Followed by Pizza</h2>
+            <p class="band-detail">Common lunch and dinner — how meal order affects blood sugar</p>
+            <p class="band-click-hint">Click the picture below to watch the video</p>
+          </div>
+          <a class="band-pane-link band-pane-link--visual" href="tested-my-videos.html#pizza-vs-salad-video" aria-label="Watch Pizza vs Salad Followed by Pizza video on My Videos">
+            <div class="band-visual-area">
+              <div class="pbj-images-wrap">
+                <div class="pbj-img-cell pbj-img-cell--cover">
+                  <img class="pbj-img-cover" src="images/Pizza_Cover.png" alt="Pizza meal comparison cover — click to watch video">
+                </div>
+                <div class="pbj-img-cell pbj-img-cell--curve">
+                  <img class="pbj-img-curve" src="images/Pizza_Curve.png" alt="Pizza blood sugar curve comparison — click to watch video">
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Beyond The Spikes · All rights reserved.
+  </footer>
+
+  <div id="spikeReducerBackdrop" class="sr-backdrop" hidden></div>
+  <div id="spikeReducerModal" class="sr-modal" hidden role="dialog" aria-modal="true" aria-labelledby="srModalTitle">
+    <div class="sr-modal-card">
+      <header class="sr-modal-header">
+        <h2 id="srModalTitle">Spike Reducer</h2>
+        <button type="button" class="sr-close" id="spikeReducerCloseBtn" aria-label="Close">×</button>
+      </header>
+      <p id="srStatus" class="sr-status" aria-live="polite">Ready</p>
+      <p id="srGreeting" class="sr-greeting"></p>
+      <label class="sr-label" for="srTextInput">Your next meal, snack, or treat (voice or type)</label>
+      <textarea id="srTextInput" class="sr-text-input" rows="3" placeholder="e.g. roti and butter chicken, or gulab jamun and jalebi"></textarea>
+      <div class="sr-actions">
+        <button type="button" class="sr-btn" id="srListenBtn" aria-label="Speak your meal">🎤 Speak</button>
+        <button type="button" class="sr-btn" id="srSendBtn">Send</button>
+        <button type="button" class="sr-btn" id="srStopBtn">Stop</button>
+      </div>
+      <div id="srTranscript" class="sr-transcript" aria-live="polite"></div>
+      <div id="srResponse" class="sr-response" aria-live="polite"></div>
+      <p class="sr-disclaimer"><strong>Educational only.</strong> Meals, snacks, sweets &amp; desserts worldwide — not medical advice.</p>
+    </div>
+  </div>
+
+  <script src="js/spike-reducer-config.js"></script>
+  <script src="js/spike-reducer-agent.js"></script>
+  <script>
+    (function () {
+      document.querySelectorAll(".nav-dropdown").forEach(function (dd) {
+        var btn = dd.querySelector(".nav-dropdown-trigger");
+        if (!btn) return;
+        dd.addEventListener("mouseenter", function () {
+          btn.setAttribute("aria-expanded", "true");
+        });
+        dd.addEventListener("mouseleave", function () {
+          btn.setAttribute("aria-expanded", "false");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
