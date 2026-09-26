@@ -565,6 +565,13 @@
               <span class="video-thumb-play" aria-hidden="true">▶</span>
             </button>
           </li>
+          <li>
+            <button type="button" class="video-thumb" data-target="cheez-its-video" aria-label="Cheez-its">
+              <span class="video-thumb-label">Cheez-its</span>
+              <img id="cheezItsYoutubeThumb" src="" alt="">
+              <span class="video-thumb-play" aria-hidden="true">▶</span>
+            </button>
+          </li>
         </ul>
         <div class="video-category-players">
           <div class="video-player-panel" id="goldfish-video" data-play-key="goldfish" hidden>
@@ -590,6 +597,31 @@
             </p>
             <p>
               <a class="video-file-link" href="https://youtube.com/shorts/_jnvkHxHmvQ" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+            </p>
+          </div>
+          <div class="video-player-panel" id="cheez-its-video" data-play-key="cheez-its" hidden>
+            <div class="youtube-facade-wrap">
+              <div id="cheezItsYoutubeFacade" class="youtube-facade youtube-frame youtube-frame--portrait">
+                <button type="button" class="youtube-facade-btn" id="cheezItsYoutubePlayBtn" aria-label="Play Cheez-its video">
+                  <img id="cheezItsYoutubePoster" src="" alt="Cheez-its — first frame preview">
+                  <span class="youtube-play-label">▶ Play video</span>
+                </button>
+              </div>
+              <div id="cheezItsYoutubeEmbed" class="youtube-embed-wrap youtube-frame youtube-frame--portrait" hidden>
+                <iframe
+                  id="cheezItsYoutubePlayer"
+                  title="Cheez-its on YouTube"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            </div>
+            <p id="cheezItsYoutubeLocalNote" class="youtube-facade-note" hidden>
+              For the embedded player, open this site with Live Server or GitHub Pages. You can still play via the button (opens YouTube).
+            </p>
+            <p>
+              <a class="video-file-link" href="https://youtu.be/_xQL5YY2FOk" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
             </p>
           </div>
         </div>
@@ -845,6 +877,25 @@
           localNoteId: "snackYoutubeLocalNote",
           sectionId: "goldfish-video",
           playKey: "goldfish",
+        }),
+        setupYoutubeSection({
+          videoId: "_xQL5YY2FOk",
+          watchUrl: "https://youtu.be/_xQL5YY2FOk",
+          posterId: "cheezItsYoutubePoster",
+          thumbId: "cheezItsYoutubeThumb",
+          posterUrls: [
+            "images/CheezIts_Cover.jpg",
+            "https://i.ytimg.com/vi/_xQL5YY2FOk/maxresdefault.jpg",
+            "https://i.ytimg.com/vi/_xQL5YY2FOk/sddefault.jpg",
+            "https://i.ytimg.com/vi/_xQL5YY2FOk/hqdefault.jpg",
+          ],
+          facadeId: "cheezItsYoutubeFacade",
+          playBtnId: "cheezItsYoutubePlayBtn",
+          embedWrapId: "cheezItsYoutubeEmbed",
+          iframeId: "cheezItsYoutubePlayer",
+          localNoteId: "cheezItsYoutubeLocalNote",
+          sectionId: "cheez-its-video",
+          playKey: "cheez-its",
         }),
         setupYoutubeSection({
           videoId: "ST0w84S5Ebc",
