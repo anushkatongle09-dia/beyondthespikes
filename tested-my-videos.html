@@ -351,6 +351,13 @@
         <h2>Common Breakfast Items</h2>
         <ul class="video-thumb-grid">
           <li>
+            <button type="button" class="video-thumb" data-target="krispy-kreme-donut-video" aria-label="Krispy Kreme Donut">
+              <span class="video-thumb-label">Krispy Kreme Donut</span>
+              <img id="krispyKremeDonutYoutubeThumb" src="" alt="">
+              <span class="video-thumb-play" aria-hidden="true">▶</span>
+            </button>
+          </li>
+          <li>
             <button type="button" class="video-thumb" data-target="hot-chocolate-croissant-video" aria-label="Hot Chocolate and Butter Croissant">
               <span class="video-thumb-label">Hot Chocolate and Butter Croissant</span>
               <img id="hotChocolateCroissantYoutubeThumb" src="" alt="">
@@ -359,6 +366,31 @@
           </li>
         </ul>
         <div class="video-category-players">
+          <div class="video-player-panel" id="krispy-kreme-donut-video" data-play-key="krispy-kreme-donut" hidden>
+            <div class="youtube-facade-wrap">
+              <div id="krispyKremeDonutYoutubeFacade" class="youtube-facade youtube-frame youtube-frame--portrait">
+                <button type="button" class="youtube-facade-btn" id="krispyKremeDonutYoutubePlayBtn" aria-label="Play Krispy Kreme Donut video">
+                  <img id="krispyKremeDonutYoutubePoster" src="" alt="Krispy Kreme Donut — first frame preview">
+                  <span class="youtube-play-label">▶ Play video</span>
+                </button>
+              </div>
+              <div id="krispyKremeDonutYoutubeEmbed" class="youtube-embed-wrap youtube-frame youtube-frame--portrait" hidden>
+                <iframe
+                  id="krispyKremeDonutYoutubePlayer"
+                  title="Krispy Kreme Donut on YouTube"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            </div>
+            <p id="krispyKremeDonutYoutubeLocalNote" class="youtube-facade-note" hidden>
+              For the embedded player, open this site with Live Server or GitHub Pages. You can still play via the button (opens YouTube).
+            </p>
+            <p>
+              <a class="video-file-link" href="https://youtube.com/shorts/9oXMdChk86U" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+            </p>
+          </div>
           <div class="video-player-panel" id="hot-chocolate-croissant-video" data-play-key="hot-chocolate-croissant" hidden>
             <div class="youtube-facade-wrap">
               <div id="hotChocolateCroissantYoutubeFacade" class="youtube-facade youtube-frame youtube-frame--portrait">
@@ -761,6 +793,25 @@
 
       var sections = [
         setupYoutubeSection({
+          videoId: "9oXMdChk86U",
+          watchUrl: "https://youtube.com/shorts/9oXMdChk86U",
+          posterId: "krispyKremeDonutYoutubePoster",
+          thumbId: "krispyKremeDonutYoutubeThumb",
+          posterUrls: [
+            "images/KrispyKremeDonut_Cover.jpg",
+            "https://i.ytimg.com/vi/9oXMdChk86U/maxresdefault.jpg",
+            "https://i.ytimg.com/vi/9oXMdChk86U/sddefault.jpg",
+            "https://i.ytimg.com/vi/9oXMdChk86U/hqdefault.jpg",
+          ],
+          facadeId: "krispyKremeDonutYoutubeFacade",
+          playBtnId: "krispyKremeDonutYoutubePlayBtn",
+          embedWrapId: "krispyKremeDonutYoutubeEmbed",
+          iframeId: "krispyKremeDonutYoutubePlayer",
+          localNoteId: "krispyKremeDonutYoutubeLocalNote",
+          sectionId: "krispy-kreme-donut-video",
+          playKey: "krispy-kreme-donut",
+        }),
+        setupYoutubeSection({
           videoId: "lJZeZPLDKJ4",
           watchUrl: "https://youtube.com/shorts/lJZeZPLDKJ4",
           posterId: "hotChocolateCroissantYoutubePoster",
@@ -1027,7 +1078,7 @@
         } else if (hash === "common-lunch-dinner") {
           deepLinkTarget = "cottage-cheese-chili-toast-video";
         } else if (hash === "common-breakfast-items") {
-          deepLinkTarget = "hot-chocolate-croissant-video";
+          deepLinkTarget = "krispy-kreme-donut-video";
         } else if (hash === "misc-category") {
           deepLinkTarget = "smoothies-protein-bowls-video";
         } else if (hash === "snacks-category") {
